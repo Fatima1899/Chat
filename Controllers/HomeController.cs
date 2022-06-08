@@ -1,7 +1,9 @@
-﻿using Chat.Models;
+﻿using Chat.Hubs;
+using Chat.Models;
 using Chat.View_Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -17,12 +19,20 @@ namespace Chat.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-       public HomeController(ILogger<HomeController> logger, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+
+        public HomeController(
+            ILogger<HomeController> logger,
+            UserManager<AppUser> userManager, 
+            SignInManager<AppUser> signInManager,
+            IHubContext<ChatHub> hubContext
+            )
         {
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
+            _hubContext = hubContext;
         }
 
         public IActionResult Index()
@@ -95,6 +105,14 @@ namespace Chat.Controllers
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("index","home");
+        }
+
+        public async Task<IActionResult> SpecificSendMessage(string id)
+        {
+            AppUser user = await _userManager.FindByIdAsync(id);
+
+            await _hubContext.Clients.Client(user.ConnectionId).SendAsync("name", user.Fullname);
+            return Content("mesaj gonderildi");
         }
     }
 }

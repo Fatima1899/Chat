@@ -35,7 +35,11 @@
         <ul class="list-group">
   @foreach (var item in Model)
  {
-     <li id="@item.Id" class="list-group-item"> <span class="@(item.ConnectionId==null?"bg-offline":"bg-online")" style=" border-radius:50%;display:inline-block;width:15px;height:15px"> </span> @item.Fullname</li>
+          <li id="@item.Id" class="list-group-item">
+                <span class="@(item.ConnectionId==null?"bg-offline":"bg-online")" style=" border-radius:50%;display:inline-block;width:15px;height:15px"> </span>
+                @item.Fullname
+                <a asp-controller="home" asp-action="SpecificSendMessage" asp-route-id="@item.Id"> Send</a>
+            </li>
  }
 </ul>
     </div>
@@ -66,6 +70,10 @@
 
             connection.on("disconnect",function(id){
                   let userLi=$(`#${id}`).find("span").addClass("bg-offline");
+            })
+
+             connection.on("name",function(fullName){
+                  console.log(`${fullName}`);
             })
         </script>
         
